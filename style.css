@@ -1,0 +1,224 @@
+:root {
+  --bg: #151517;
+  --bg-alt: #1b1b1c;
+  --fg: #d7d7d7;
+  --fg-dim: #8a8a8a;
+  --border: #2e2e31;
+  --code-bg: #202023;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* ===== Блок ссылок сверху ===== */
+.links-block {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.links-title {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin: 0 0 12px;
+  padding: 0;
+  border: none;
+}
+
+.links-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px 22px;
+}
+
+.links-grid li {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0 6px 10px;
+  border-left: 2px solid var(--border);
+}
+
+.links-grid a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  font-size: 14px;
+}
+
+.links-grid a:hover { text-decoration-color: var(--fg); }
+
+.links-grid .url {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--fg-dim);
+  margin-top: 2px;
+  word-break: break-all;
+}
+
+/* ===== Шапка ===== */
+header {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 28px 20px 12px;
+}
+
+header h1 {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+nav {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+nav a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  margin-right: 14px;
+  white-space: nowrap;
+}
+
+nav a:hover { text-decoration-color: var(--fg); }
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 8px 20px 60px;
+}
+
+section {
+  margin: 32px 0;
+  scroll-margin-top: 12px;
+}
+
+h2 {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+p { margin: 0 0 12px; }
+
+a { color: var(--fg); text-decoration: underline; text-decoration-color: var(--border); }
+a:hover { text-decoration-color: var(--fg); }
+
+s { color: var(--fg-dim); }
+
+code, pre, kbd {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 13px;
+}
+
+code {
+  background: var(--code-bg);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  overflow-x: auto;
+  line-height: 1.45;
+  margin: 10px 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+th, td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: var(--bg-alt);
+  font-weight: 600;
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 13px;
+}
+
+tr.sum td {
+  background: var(--bg-alt);
+  font-weight: 600;
+}
+
+ul, ol { margin: 0 0 12px; padding-left: 22px; }
+li { margin: 4px 0; }
+
+/* ===== Пути закрытия ===== */
+.paths {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 14px 0;
+}
+
+@media (max-width: 640px) {
+  .paths { grid-template-columns: 1fr; }
+}
+
+.path {
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  padding: 12px 16px;
+}
+
+.path h3 {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+}
+
+.path ul { margin: 0; padding-left: 18px; }
+.path li { margin: 5px 0; }
+
+.paths-note {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--fg-dim);
+  padding: 10px 16px;
+  margin: 14px 0;
+}
+
+.paths-note p { margin: 0 0 6px; }
+.paths-note ul { margin: 0; padding-left: 18px; }

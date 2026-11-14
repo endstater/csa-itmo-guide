@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как закрыть АК — памятка</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<section id="links" class="links-block">
+  <h2 class="links-title">Ссылки</h2>
+  <ul class="links-grid">
+    <li><a href="https://gitlab.se.ifmo.ru/computer-systems/csa-rolling">Репозиторий курса</a><span class="url">gitlab.se.ifmo.ru/computer-systems/csa-rolling</span></li>
+    <li><a href="https://t.me/+6uf-vI6dVo42MmRk">Чат потока</a><span class="url">t.me / csa_ак_2026.2</span></li>
+    <li><a href="https://docs.google.com/spreadsheets/d/1WvS1ad9J6jXNwSxTRnQs4yGgUBlwFzopUXUiYbGCZMw/edit">Ведомость</a><span class="url">Google Sheets</span></li>
+    <li><a href="https://slap-2026-2.edu.swampbuds.me">Очереди (slap)</a><span class="url">slap-2026-2.edu.swampbuds.me</span></li>
+    <li><a href="http://wrench.edu.swampbuds.me">Wrench — сдача Лаб 3</a><span class="url">wrench.edu.swampbuds.me</span></li>
+    <li><a href="https://github.com/ryukzak/wrench">Wrench — исходники</a><span class="url">github.com/ryukzak/wrench</span></li>
+    <li><a href="https://github.com/ryukzak/wrench/blob/master/variants.md">Варианты Лаб 3</a><span class="url">variants.md</span></li>
+    <li><a href="https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/exam-questions-blitz.md">Вопросы к экзамену</a><span class="url">exam-questions-blitz.md</span></li>
+    <li><a href="http://csa.edu.swampbuds.me">Слайды</a><span class="url">csa.edu.swampbuds.me</span></li>
+    <li><a href="https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/side-quests.md">Побочные квесты</a><span class="url">side-quests.md</span></li>
+  </ul>
+</section>
+
+<header>
+  <h1>Как закрыть АК</h1>
+</header>
+
+<nav>
+  <a href="#what">Что это</a>
+  <a href="#paths">Пути закрытия</a>
+  <a href="#grades">Из чего оценка</a>
+  <a href="#penalties">Штрафы Лаб 3</a>
+  <a href="#submit">Как сдавать</a>
+  <a href="#exam">Экзамен</a>
+  <a href="#extra">Дополнительно</a>
+  <a href="#links">Ссылки</a>
+</nav>
+
+<main>
+
+<section id="what">
+  <h2>1. Что такое АК</h2>
+  <p>Курс про устройство вычислительных платформ: как они работают, откуда взялись и почему устроены именно так. Нужно писать на разных версиях ассемблера. Грубо говоря, написать 4 программы на разных ассемблерах и сдать теоретические лабы.</p>
+</section>
+
+<section id="paths">
+  <h2>2. Пути закрытия</h2>
+  <p>Выбираешь <b>один</b> из двух вариантов:</p>
+
+  <div class="paths">
+    <div class="path">
+      <h3>Вариант 1</h3>
+      <ul>
+        <li>Лаб 1</li>
+        <li>Полный экзамен</li>
+        <li>Или сокращённый экзамен, но тогда оценка не выше C (зачёт / незачёт)</li>
+      </ul>
+    </div>
+    <div class="path">
+      <h3>Вариант 2</h3>
+      <ul>
+        <li>Лаб 4</li>
+        <li>Экзамен не нужно сдавать, если Лаб 4 ≥ 20 баллов, иначе обязателен</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="paths-note">
+    <p><b>Обязательно в любом варианте:</b></p>
+    <ul>
+      <li>сдать всю Лаб 3;</li>
+      <li>в любом случае можно добрать сайдквесты и дополнительные задания.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="grades">
+  <h2>3. Из чего складывается оценка</h2>
+  <table>
+    <thead><tr><th>Работа</th><th>min</th><th>max</th></tr></thead>
+    <tbody>
+      <tr><td>Лаб 1. Семинар</td><td>9</td><td>15</td></tr>
+      <tr><td><s>Лаб 2. Эссе</s></td><td colspan="2">упразднена (устарела, ДЕЛАТЬ НЕ НАДО)</td></tr>
+      <tr><td>Лаб 3. Опыты</td><td>36</td><td>60</td></tr>
+      <tr><td>&nbsp;&nbsp;— acc32</td><td>6</td><td>10</td></tr>
+      <tr><td>&nbsp;&nbsp;— f32a</td><td>6</td><td>10</td></tr>
+      <tr><td>&nbsp;&nbsp;— risc-iv</td><td>6</td><td>10</td></tr>
+      <tr><td>&nbsp;&nbsp;— m68k</td><td>6</td><td>10</td></tr>
+      <tr><td>&nbsp;&nbsp;— schema (схема)</td><td>12</td><td>20</td></tr>
+      <tr><td>Лаб 4. Эксперимент</td><td>5</td><td>40</td></tr>
+      <tr><td>Экзамен</td><td>15</td><td>25</td></tr>
+      <tr class="sum"><td>Сумма Soft (Лаб1 + Лаб3 + Экзамен)</td><td>60</td><td>100</td></tr>
+      <tr class="sum"><td>Сумма Hard (Лаб3 + Лаб4)</td><td>60</td><td>100</td></tr>
+      <tr><td>Лаб 3, опциональные опыты (vliw, wasm)</td><td>12</td><td>20</td></tr>
+      <tr><td>Побочные «квесты», бонусы</td><td>0</td><td>10</td></tr>
+    </tbody>
+  </table>
+
+  <p>В README приведены две справочные суммы — <b>Soft</b> (Лаб1 + Лаб3 + Экзамен) и <b>Hard</b> (Лаб3 + Лаб4). Минимум для закрытия — <b>60</b> баллов. Оценка по набранной сумме:</p>
+  <table>
+    <thead><tr><th>Баллы</th><th>Оценка</th></tr></thead>
+    <tbody>
+      <tr><td>меньше 60</td><td>FX (неуд.)</td></tr>
+      <tr><td>60 – 67 включ.</td><td>E (удовл.)</td></tr>
+      <tr><td>больше 67 – 74 включ.</td><td>D (удовл.)</td></tr>
+      <tr><td>больше 74 – 83 включ.</td><td>C (хорошо)</td></tr>
+      <tr><td>больше 83 – 90 включ.</td><td>B (хорошо)</td></tr>
+      <tr><td>больше 90</td><td>A (отлично)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="penalties">
+  <h2>4. Штрафы Лаб 3</h2>
+  <p>Штрафы за темп сдачи. Считается число сданных работ к указанной неделе:</p>
+  <table>
+    <thead><tr><th>Неделя</th><th>Условие</th><th>Штраф</th></tr></thead>
+    <tbody>
+      <tr><td>5</td><td>сдано &lt; 1</td><td>−3</td></tr>
+      <tr><td>8</td><td>сдано &lt; 2</td><td>−3</td></tr>
+      <tr><td>12</td><td>сдано &lt; 3</td><td>−3</td></tr>
+      <tr><td>15</td><td>сдано &lt; 4</td><td>−3</td></tr>
+      <tr><td>16+</td><td>без пересдач</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p><b>Схема</b> (schema) должна быть сдана до сдачи опциональных архитектур (vliw, wasm) и Лаб 4, иначе <b>−4</b> балла. Пересдача после дедлайна не спасает от штрафа. Сдача одного задания чаще раза в 24 часа не допускается.</p>
+</section>
+
+<section id="submit">
+  <h2>5. Как сдавать</h2>
+  <ol>
+    <li>Зарегистрируйся в <a href="https://slap-2026-2.edu.swampbuds.me">slap</a> с номером ИСУ и ФИО.</li>
+    <li>Лаб 3: код и конфиг загружай на <a href="http://wrench.edu.swampbuds.me/submit-form">wrench.edu.swampbuds.me/submit-form</a> — прогоняются автотесты. Успех → сохрани ссылку на страницу отчёта (и копию загруженных данных — может понадобиться перезалить).</li>
+    <li>Остальные работы: загрузи описание/ссылку в slap. Ссылка должна быть публичной и неизменной.</li>
+    <li>Запишись на ближайшее занятие в slap. Сортировка — по дате загрузки результата.</li>
+    <li>Приди на занятие со ссылками — защита устная, на занятиях и консультациях. Сдача одного задания чаще раза в 24 часа не допускается.</li>
+    <li>Не успеваешь прийти — нажми revoke и выбери другое занятие.</li>
+  </ol>
+  <p>Лаб 3 оценивается 10 баллов (реализация + достойные ответы), 6 баллов (реализация + частичные ответы), 0 (нет реализации и/или корректных ответов). Схема: потолок 16 без усложнения, 20 с усложнением.</p>
+</section>
+
+<section id="exam">
+  <h2>6. Экзамен</h2>
+  <ul>
+    <li>Билет — 2 случайных вопроса по материалу курса. Подготовки нет, отвечаешь сразу в общем виде.</li>
+    <li>Вопросы: <a href="https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/exam-questions-blitz.md">exam-questions-blitz.md</a>. Поток коллективно выбирает 3 вопроса, от которых можно отказаться (они не попадают в билеты).</li>
+    <li>Нужны включённая камера и микрофон, без наушников. При подозрении в несамостоятельности могут попросить ответить крупным планом с закрытыми глазами.</li>
+  </ul>
+  <table>
+    <thead><tr><th>Правило оценивания</th><th>Эффект</th></tr></thead>
+    <tbody>
+      <tr><td>База за вопрос</td><td>20 баллов</td></tr>
+      <tr><td>Любой вопрос на 0</td><td>итог за экзамен = 0</td></tr>
+      <tr><td>Любой вопрос на 5</td><td>округление вниз</td></tr>
+      <tr><td>Иначе</td><td>округление в пользу студента</td></tr>
+      <tr><td>Сдано при</td><td>итог ≥ 15</td></tr>
+    </tbody>
+  </table>
+  <p>Длительность ответа — несколько минут. «Поток сознания» и затягивание снижают оценку до 15. Целостность и структура — повышают.</p>
+</section>
+
+<section id="extra">
+  <h2>7. Дополнительно</h2>
+  <ul>
+    <li><b>Презумпция одного балла.</b> Не хватает ровно 1 балла до следующей оценки — скажи на консультации после экзамена, добавят. Не начинай рассуждать про доли балла — потеряешь привилегию.</li>
+    <li><b>Побочные квесты.</b> До 10 бонусных баллов за правки материалов курса, развитие wrench/brainfuck, конспект лекций, организацию. Принимаются как MR, вклад засчитывается после ревью и слияния. Подробности — <a href="https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/side-quests.md">side-quests.md</a>.</li>
+    <li><b>Экспресс-экзамен.</b> При пересдаче: 2 вопроса, отвечать быстро и по сути. Нужно ответить на оба на минимальный балл; больше минимального получить нельзя. Растекание мыслью = провал.</li>
+    <li><b>Зачётный путь.</b> Лаб 1 + все 5 обязательных пунктов Лаб 3 + сокращённый экспресс-экзамен (зачёт, без баллов) → закрытие с оценкой не выше C.</li>
+  </ul>
+</section>
+
+</main>
+
+</body>
+</html>
