@@ -222,3 +222,46 @@ li { margin: 4px 0; }
 
 .paths-note p { margin: 0 0 6px; }
 .paths-note ul { margin: 0; padding-left: 18px; }
+
+/* ===== Подстраницы ISA ===== */
+.subnav {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 20px 0;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.subnav .sep { color: var(--border); margin: 0 8px; }
+
+.subtitle {
+  color: var(--fg-dim);
+  font-size: 14px;
+  margin: 0;
+}
+
+.source {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px 8px;
+  font-size: 12px;
+  color: var(--fg-dim);
+}
+
+.source a { color: var(--fg-dim); text-decoration-color: var(--border); }
+.source a:hover { color: var(--fg); }
+
+main h3 {
+  font-family: &quot;JetBrains Mono&quot;, &quot;Fira Code&quot;, ui-monospace, monospace;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 20px 0 8px;
+  color: var(--fg);
+}
+
+main h4 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 16px 0 6px;
+  color: var(--fg-dim);
+}

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>schema — RTL-схема процессора</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="subnav">
+  <a href="index.html">← На главную</a>
+  <span class="sep">|</span>
+  <a href="acc32.html">acc32</a>
+  <a href="f32a.html">f32a</a>
+  <a href="risc-iv.html">risc-iv</a>
+  <a href="m68k.html">m68k</a>
+  <a href="schema.html">schema</a>
+</nav>
+
+<p class='source'>Источники: <a href='https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/lab3-task.md'>lab3-task.md (раздел «Схема»)</a> · <a href='https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/slides/08-isa-harvard-cisc.md'>лекция 8</a> · <a href='https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/slides/09-microcode-stack-risc-pipeline.md'>лекция 9</a> · <a href='https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/slides/10-hazard-io-pmio-mmio-polling.md'>лекция 10</a></p>
+
+<header>
+  <h1>schema</h1>
+  <p class="subtitle">RTL-схема процессора (микроархитектура)</p>
+</header>
+
+<main>
+
+<section>
+  <h2>1. Что это</h2>
+  <p>«Схема» в Лаб 3 — это <b>не ISA</b>, а <b>микроархитектура</b>: принципиальная схема процессора на уровне регистровых передач (RTL — Register Transfer Level).</p>
+  <p>Различие из лекции 8:</p>
+  <ul>
+    <li><b>Архитектура</b> — то, как видит компьютер программист: набор команд, место операндов, вычислительные механизмы. Её определяет ISA.</li>
+    <li><b>Микроархитектура</b> — соединение простейших цифровых элементов в логические блоки, предназначенные для выполнения команд этой архитектуры: регистры, АЛУ, конечные автоматы, блоки памяти, интерфейсы ввода-вывода.</li>
+  </ul>
+  <p>У одной архитектуры много микроархитектур с разным соотношением производительности, цены и сложности, при этом они бинарно совместимы. Именно поэтому схему сдают отдельно от реализаций ISA.</p>
+  <p>RTL-схема (по <code>lab3-task.md</code>) отвечает на вопросы:</p>
+  <ul>
+    <li>какие регистры и шины есть в процессоре;</li>
+    <li>какие данные и куда передаются на каждом такте;</li>
+    <li>какие управляющие сигналы генерирует Control Unit и когда.</li>
+  </ul>
+  <p>Control Unit (CU) — часть процессора, которая по коду команды, флагам и номеру такта формирует сигналы управления DataPath. DataPath — путь данных: регистры, АЛУ, мультиплексоры, память.</p>
+</section>
+
+<section>
+  <h2>2. Требования к лабе</h2>
+  <p>Из <code>lab3-task.md</code>, раздел «Схема»:</p>
+  <ul>
+    <li>Схема выполняется на уровне <b>регистровых передач (RTL)</b>.</li>
+    <li>Архитектура и микроархитектура должны соответствовать варианту из ведомости.</li>
+    <li>Схема публикуется в репозитории и доступна по ссылке; ссылка указывается в <code>slap</code> с номером коммита.</li>
+    <li>Шины данных и управляющие сигналы визуально различимы.</li>
+    <li>Все блоки, шины и MUX именованы.</li>
+    <li>Управляющие сигналы от CU именованы; рисовать сигнальные линии полностью не рекомендуется, чтобы не было «спагетти».</li>
+    <li>Никаких вентилей и демультиплексоров.</li>
+  </ul>
+
+  <h3>Варианты и усложнения</h3>
+  <p>Ведомость назначает <b>базовый вариант</b> (16 баллов). Можно сдать его с одним <b>усложнением</b> (20 баллов), дописав суффикс к варианту. Циклы инструкций — многотактные, ввод-вывод — Memory Mapped IO, hardwired (по умолчанию).</p>
+  <table>
+    <thead><tr><th>Базовый вариант</th><th>Усложнения (суффиксы)</th></tr></thead>
+    <tbody>
+      <tr><td><code>acc32-neumann</code> / <code>acc32-harv</code></td><td><code>-microcode</code>, <code>-pipeline-2</code> (IF/EX), <code>-cache</code> / <code>-dcache</code></td></tr>
+      <tr><td><code>m68k-neumann</code> / <code>m68k-harv</code></td><td><code>-microcode</code>, <code>-pipeline-2</code> (IF/EX), <code>-cache</code> / <code>-dcache</code></td></tr>
+      <tr><td><code>f32a-neumann</code> / <code>f32a-harv</code></td><td><code>-microcode</code>, <code>-pipeline-2</code> (IF/EX), <code>-cache</code> / <code>-dcache</code></td></tr>
+      <tr><td><code>risc-iv-32-neumann</code></td><td><code>-microcode</code>, <code>-pipeline-3</code> (IF/EX/WB), <code>-pipeline-5</code> (IF/ID/EX/MEM/WB), <code>-cache</code></td></tr>
+    </tbody>
+  </table>
+  <p>Полная таблица всех вариантов — в <code>lab3-task.md</code>, раздел «Варианты» под «Схемой».</p>
+
+  <h3>Оценивание</h3>
+  <table>
+    <thead><tr><th>Баллы</th><th>За что</th></tr></thead>
+    <tbody>
+      <tr><td>16 / 20 (максимум)</td><td>корректная RTL-схема и достойные ответы на вопросы</td></tr>
+      <tr><td>14 / 18</td><td>схема с мелкими ошибками и неполные ответы</td></tr>
+      <tr><td>12</td><td>корректная схема и частичные ответы, многократная сдача</td></tr>
+      <tr><td>0</td><td>нет корректной схемы и/или корректных ответов; схема нечитаема</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>3. Что рисовать</h2>
+  <p>Отдельного «эталонного» списка блоков схемы нет — он выводится из лекций и требований. Что явно описано в лекциях (8, 9, 10):</p>
+
+  <h4>Регистры аккумуляторного процессора (лекция 8)</h4>
+  <ul>
+    <li><code>PC</code> — счётчик команд;</li>
+    <li><code>IR</code> — регистр инструкций;</li>
+    <li><code>AR</code> — регистр адреса операнда;</li>
+    <li>аккумулятор <code>Acc</code>;</li>
+    <li>флаги <code>C</code> (перенос/заём), <code>Z</code> (ноль).</li>
+  </ul>
+
+  <h4>Control Unit (лекция 9)</h4>
+  <ul>
+    <li>Hardwired — сигналы вычисляются комбинационной логикой из опкода, флагов и номера такта.</li>
+    <li>Microcoded — сигналы хранятся в памяти микрокоманд и читаются по адресу <code>mPC</code>; <code>mux_mPC</code> выбирает <code>+1</code> (следующий шаг), <code>DC</code> (декодер: начало микропрограммы команды по опкоду) или <code>=0</code> (снова выборка).</li>
+    <li>Микрокоманда = слово сигналов DataPath + поле выбора следующего адреса.</li>
+  </ul>
+  <p>Пример RTL-шагов из лекции 8 (для инструкции <code>add #01 &lt;- 34 + #03</code>): чтение инструкции (<code>IR &lt;- PMem[PC]; PC &lt;- PC+1</code>), инициализация аккумулятора, выгрузка адресов, сложение, сохранение результата. В лекции 9 то же самое показано как микропрограмма с таблицей управляющих сигналов по тактам (<code>latch_PC</code>, <code>mux_PC</code>, <code>latch_IR</code>, <code>latch_AR</code>, <code>latch_Acc</code>, <code>latch_ZC</code>, <code>MUX2</code>, <code>ALU</code>, <code>OE</code>, <code>WR</code>).</p>
+
+  <h4>DataPath — типовые элементы</h4>
+  <ul>
+    <li><b>MUX перед АЛУ</b> — выбирает, что подать на вход АЛУ (аккумулятор, память, непосредственное значение).</li>
+    <li><b>Регистровый файл</b> — набор регистров с портами чтения и записи (для risc-iv).</li>
+    <li><b>Память</b> — для Harvard-архитектуры раздельные IM и DM, для фон Неймана — общая.</li>
+    <li><b>Стек</b> — для f32a: в лекции 9 разобраны способы реализации (в памяти через <code>SP</code>; сдвиговые регистры; TOS + SOS + память).</li>
+  </ul>
+
+  <h4>Ввод-вывод</h4>
+  <p>В лабе по умолчанию — <b>Memory Mapped I/O</b>: регистры устройств отображены в адресное пространство памяти и доступны обычными <code>load</code>/<code>store</code> (лекция 10). Вопрос к защите: как процессор различает обращение к RAM и к устройству; как схема отличается для Harvard и von Neumann.</p>
+
+  <p>Примеры схем — на лекциях, а также в <a href="https://github.com/ryukzak/brainfuck">примере реализации для Лаб 4</a> (так указано в <code>lab3-task.md</code>).</p>
+</section>
+
+
+
+</main>
+</body>
+</html>
