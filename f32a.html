@@ -18,7 +18,7 @@
   <a href="schema.html">schema</a>
 </nav>
 
-<p class='source'>Источник: <a href='https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/slides/09-microcode-stack-risc-pipeline.md'>лекция 9 — Control Unit. Microcode. Stack. RISC. Pipeline</a></p>
+<p class='source'>Источник: <a href='https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/slides/09-microcode-stack-risc-pipeline.md'>лекция 9 — Control Unit. Microcode. Stack. RISC. Pipeline</a> · <a href='https://github.com/ryukzak/wrench/blob/master/docs/f32a.md'>wrench docs/f32a.md</a></p>
 
 <header>
   <h1>f32a</h1>
@@ -34,37 +34,74 @@
   <ul>
     <li><b>Стек</b> — структура «последним пришёл — первым вышел» (LIFO). <code>push</code> кладёт значение на вершину, <code>pop</code> снимает.</li>
     <li><b>Операнд</b> — то, над чем выполняется операция. У стековой машины операнды — это верхние ячейки стека.</li>
-    <li><b>Стек данных</b> и <b>стек возвратов</b> — в f32a их может быть один или два (по варианту). На стеке данных лежат значения, на стеке возвратов — адреса возврата из процедур.</li>
+    <li><b>Стек данных</b> и <b>стек возвратов</b> — в f32a их два. На стеке данных лежат значения, на стеке возвратов — адреса возврата из процедур.</li>
+    <li><b>Регистры A и B</b> — два вспомогательных регистра для адресов: <code>@</code> читает по адресу в A, <code>!</code> пишет по адресу в A. Это единственный способ добраться до памяти, кроме <code>@p</code>/<code>!p</code> с абсолютным адресом.</li>
   </ul>
-  <p>По классификации лекции 8 стековая архитектура — <b>самая высокая плотность кода</b>: операция занимает байт, полей регистров нет. Доступ к памяти — только через специальные команды <code>@</code> (чтение) и <code>!</code> (запись). Примеры: <code>f32a</code>, JVM, WebAssembly.</p>
+  <p>По классификации лекции 8 стековая архитектура — <b>самая высокая плотность кода</b>: операция занимает байт, полей регистров нет. Доступ к памяти — только через <code>@</code> (чтение слова) и <code>!</code> (запись слова). Примеры: <code>f32a</code>, JVM, WebAssembly.</p>
   <p>Историческая справка из лекции 9: прообраз <code>f32a</code> — процессор F18A (Forth-процессор), на его основе сделаны матрицы GreenArrays GA144. Стековые машины применяют во встраиваемых и космических системах (Harris RTX 2010) и в виртуальных машинах (JVM, .NET CLR, WebAssembly, CPython).</p>
 </section>
 
 <section>
   <h2>2. Система команд</h2>
-  <p>В лекции 9 приведён пример инструкций f32a. Полный перечень — в документации <a href="https://github.com/ryukzak/wrench">wrench</a>.</p>
+  <p>Комментарии в f32a — <b><code>\</code></b>, не <code>;</code>. Символ <code>;</code> — это инструкция Return, а не начало комментария. Это важно: код на acc32 с <code>;</code>-комментариями в f32a не соберётся.</p>
 
+  <h3>Стек и регистры</h3>
   <table>
-    <thead><tr><th>Инструкция</th><th>Что делает</th></tr></thead>
+    <thead><tr><th>Инструкция</th><th>Эффект на стек</th><th>Что делает</th></tr></thead>
     <tbody>
-      <tr><td><code>+</code></td><td><code>push(pop() + pop())</code> — снять два значения, сложить, положить результат</td></tr>
-      <tr><td><code>a!</code></td><td><code>A = pop()</code> — снять значение в регистр A (адресный)</td></tr>
-      <tr><td><code>@</code></td><td><code>push(mem[A])</code> — прочитать память по адресу в A, положить на стек</td></tr>
-      <tr><td><code>!</code></td><td><code>mem[A] = pop()</code> — снять значение со стека и записать в память по адресу A</td></tr>
-      <tr><td><code>if L</code></td><td><code>if pop() == 0: PC = L</code> — снять значение, если ноль, перейти на L</td></tr>
-      <tr><td><code>L</code> (call)</td><td><code>rpush(PC); PC = L</code> — положить адрес возврата на стек возвратов, перейти на L</td></tr>
-      <tr><td><code>;</code> (return)</td><td><code>PC = rpop()</code> — снять адрес возврата со стека возвратов</td></tr>
-      <tr><td><code>@+</code></td><td>автоинкремент: косвенное чтение, затем указатель + 1 (из таблицы адресации лекции 8)</td></tr>
+      <tr><td><code>lit N</code> или просто <code>N</code></td><td><code>( -- n )</code></td><td>положить литерал на стек</td></tr>
+      <tr><td><code>dup</code></td><td><code>( a -- a a )</code></td><td>дублировать вершину. <b>Не сбрасывает carry</b> (единственная push-инструкция с таким свойством — для <code>eam</code>)</td></tr>
+      <tr><td><code>drop</code></td><td><code>( a -- )</code></td><td>снять вершину</td></tr>
+      <tr><td><code>over</code></td><td><code>( a b -- a b a )</code></td><td>скопировать второй элемент наверх</td></tr>
+      <tr><td><code>a!</code></td><td><code>( v -- )</code>, A := v</td><td>снять значение в регистр A</td></tr>
+      <tr><td><code>a</code></td><td><code>( -- v )</code>, v := A</td><td>положить A на стек</td></tr>
+      <tr><td><code>b!</code></td><td><code>( v -- )</code>, B := v</td><td>снять в B</td></tr>
+      <tr><td><code>@</code></td><td><code>( -- v )</code>, v := mem[A]</td><td>прочитать <b>слово</b> (4 байта) по адресу в A</td></tr>
+      <tr><td><code>!</code></td><td><code>( v -- )</code>, mem[A] := v</td><td>записать <b>слово</b> по адресу в A</td></tr>
+      <tr><td><code>@p addr</code></td><td><code>( -- v )</code>, v := mem[addr]</td><td>прочитать слово по <b>абсолютному</b> адресу (в обход A)</td></tr>
+      <tr><td><code>!p addr</code></td><td><code>( v -- )</code>, mem[addr] := v</td><td>записать слово по абсолютному адресу</td></tr>
+      <tr><td><code>@+</code></td><td><code>( -- v )</code>, A := A + 1</td><td>прочитать слово по [A], потом A := A+1</td></tr>
+      <tr><td><code>!+</code></td><td><code>( v -- )</code>, A := A + 1</td><td>записать слово по [A], потом A := A+1</td></tr>
+      <tr><td><code>@b</code>, <code>!b</code></td><td></td><td>то же через регистр B</td></tr>
+      <tr><td><code>&gt;r</code>, <code>r&gt;</code></td><td><code>( v -- )</code>, <code>( -- v )</code></td><td>переслать вершину между data stack и return stack</td></tr>
     </tbody>
   </table>
 
-  <h3>Режимы адресации</h3>
-  <p>Из таблицы адресации лекции 8 для f32a указаны:</p>
+  <h3>Арифметика и логика</h3>
+  <table>
+    <thead><tr><th>Инструкция</th><th>Эффект</th><th>Что делает</th></tr></thead>
+    <tbody>
+      <tr><td><code>+</code></td><td><code>( a b -- a+b )</code></td><td>сложение, выставляет carry</td></tr>
+      <tr><td><code>2*</code></td><td><code>( a -- a&lt;&lt;1 )</code></td><td>сдвиг влево на 1 бит</td></tr>
+      <tr><td><code>2/</code></td><td><code>( a -- a&gt;&gt;1 )</code></td><td>сдвиг вправо на 1 бит, <b>арифметический</b> (знак сохраняется)</td></tr>
+      <tr><td><code>and</code></td><td><code>( a b -- a&amp;b )</code></td><td>побитовое И</td></tr>
+      <tr><td><code>xor</code></td><td><code>( a b -- a^b )</code></td><td>побитовое искл. ИЛИ</td></tr>
+      <tr><td><code>inv</code></td><td><code>( a -- ~a )</code></td><td>инверсия всех бит</td></tr>
+      <tr><td><code>eam</code></td><td><code>( f -- )</code></td><td>Extended Arithmetic Mode: <code>+</code> будет учитывать carry. Для многократной точности</td></tr>
+      <tr><td><code>+*</code></td><td>микрошаг умножения</td><td>умножение через итерации; использовать редко</td></tr>
+      <tr><td><code>+/</code></td><td>микрошаг деления</td><td>деление через итерации</td></tr>
+    </tbody>
+  </table>
+  <p><b>Чего нет в f32a:</b></p>
   <ul>
-    <li><b>стековая</b> — операнд на вершине стека (пример: <code>+</code>);</li>
-    <li><b>автоинкремент</b> — косвенная адресация, затем указатель + 1 (пример: <code>@+</code>).</li>
+    <li><b><code>or</code> нет.</b> Побитовое ИЛИ собирается через Де Моргана: <code>inv</code> + <code>and</code> + <code>inv</code> = <code>~( ~a &amp; ~b )</code>.</li>
+    <li><b><code>swap</code> нет.</b> Поменять два верхних значения — через return stack (<code>&gt;r</code>, <code>&gt;r</code>, <code>r&gt;</code>, <code>r&gt;</code>) или через промежуточную ячейку памяти.</li>
+    <li><b>Сдвига на k бит нет.</b> Только <code>2*</code>/<code>2/</code> на 1 бит, поэтому сдвиг на k — цикл из k итераций.</li>
   </ul>
-  <p>Прочие режимы адресации для f32a в таблице лекции 8 не указаны.</p>
+
+  <h3>Управление</h3>
+  <table>
+    <thead><tr><th>Инструкция</th><th>Что делает</th></tr></thead>
+    <tbody>
+      <tr><td><code>&lt;label&gt;</code></td><td><b>Call</b>: положить адрес возврата на return stack, перейти на label</td></tr>
+      <tr><td><code>&lt;label&gt; ;</code></td><td><b>Jump</b>: перейти на label без сохранения адреса возврата</td></tr>
+      <tr><td><code>;</code></td><td><b>Return</b>: снять адрес возврата с return stack</td></tr>
+      <tr><td><code>if L</code></td><td>снять вершину; если ноль — перейти на L (как <code>JZ</code>)</td></tr>
+      <tr><td><code>-if L</code></td><td>снять вершину; если <b>неотрицательная</b> — перейти на L</td></tr>
+      <tr><td><code>next L</code></td><td>декрементировать вершину return stack; если не ноль — перейти на L. Для 32 повторений счётчик = <b>31</b>, не 32</td></tr>
+      <tr><td><code>halt</code></td><td>остановить машину</td></tr>
+    </tbody>
+  </table>
 
   <h3>Классификация стековых машин</h3>
   <p>Из лекции 9 — по каким признакам различают стековые машины:</p>
@@ -88,7 +125,8 @@
     <li>32-битное машинное слово по умолчанию;</li>
     <li>ввод вне области определения — <code>-1</code>;</li>
     <li>результат не помещается в слово — слово из байтов <code>0xCC</code>;</li>
-    <li>код отформатирован, журнал не обрезан;</li>
+    <li><b><code>.org 0x88</code></b> — данные начинаются сразу за MMIO-портами. Иначе данные начнутся с <code>0x100</code> и зря сожгут 120 байт, и код может не влезть в лимит памяти;</li>
+    <li>код отформатирован (<code>wrench-fmt</code>), журнал не обрезан;</li>
     <li>сдача одного задания — не чаще раза в 24 часа.</li>
   </ul>
   <p>Почему процедуры для f32a — естественно: аргументы уже лежат на стеке данных, адрес возврата сам уходит на стек возвратов, сохранять регистры не нужно. В лекции 9 это показано сравнением: на стековой машине <code>sum-of-squares</code> — 5 «слов» Forth, а на risc-iv — 15 инструкций, из которых 8 — работа с кадром стека.</p>
@@ -112,13 +150,42 @@
     <li><code>+</code> складывает два квадрата.</li>
   </ul>
   <p>Обрати внимание: в коде нет ни одного имени регистра — вся «передача данных» между операциями идёт через вершину стека. Это и есть главная идея архитектуры.</p>
-  <p>Ещё один пример из лекции 8 — линейная функция на стековой машине (стиль Forth):</p>
-<pre>A @ X @ *     \ stack, 0 operands
-B @ + Y !     \ @ - read, ! - write</pre>
-  <p>Читается как: положить A, положить X, перемножить, положить B, сложить, записать в Y. В таблице лекции у этого варианта 10 инструкций (больше всех), зато каждая — очень короткая.</p>
+  <p>Учебный код на f32a из wrench — чтение MMIO и запись результата (идиома <code>@p addr a! @</code>):</p>
+<pre>    .data
+    .org 0x88
+input_addr:     .word 0x80
+output_addr:    .word 0x84
+    .text
+_start:
+    @p input_addr a! @       \ прочитать слово из порта 0x80
+    little_to_big_endian     \ вызов процедуры: T <- be(n)
+    @p output_addr a! !      \ записать слово в порт 0x84
+    halt</pre>
+  <p>Как это читается:</p>
+  <ul>
+    <li><code>@p input_addr</code> — положить на стек <b>значение</b> ячейки <code>input_addr</code> (= 0x80);</li>
+    <li><code>a!</code> — снять его в регистр A;</li>
+    <li><code>@</code> — прочитать <b>слово</b> (4 байта) из порта [A] = 0x80 — это вход;</li>
+    <li><code>little_to_big_endian</code> — вызов процедуры (голое имя метки = Call, не Jump);</li>
+    <li><code>@p output_addr a! !</code> — то же в обратную сторону: адрес 0x84 в A, значение со стека в [A].</li>
+  </ul>
 </section>
 
-
+<section>
+  <h2>5. Грабли (из личного опыта)</h2>
+  <ol>
+    <li><b><code>\</code>, а не <code>;</code>.</b> <code>;</code> — это Return. Код, скопированный из acc32, не соберётся.</li>
+    <li><b><code>@</code> и <code>!</code> — word, не byte.</b> Чтение из MMIO 0x80 даёт сразу 32-битное слово, не байт. В brief и на слайде размер не указан — смотреть <code>docs/f32a.md</code>: <code>@ ( -- value: i32 )</code>.</li>
+    <li><b>MMIO queue в conf wrench — список СЛОВ, не байтов.</b> <code>0x80: [305419896]</code> = одно слово 0x12345678; <code>0x80: [0x78, 0x56, 0x34, 0x12]</code> = четыре отдельных слова (первое = 120).</li>
+    <li><b><code>or</code> нет.</b> Через <code>inv</code>, <code>and</code>, <code>inv</code>.</li>
+    <li><b><code>swap</code> нет.</b> Через return stack или промежуточную ячейку.</li>
+    <li><b><code>&lt;label&gt; ;</code> — это Jump, не «call + return».</b> Голое <code>&lt;label&gt;</code> — Call. <code>;</code> отдельно — Return.</li>
+    <li><b><code>next</code> использует return stack, не data stack.</b> Счётчик кладётся через <code>&gt;r</code>; для 32 итераций исходное значение = 31.</li>
+    <li><b><code>if</code> прыгает если TOS == 0</b> (как JZ), а не «если true». <code>-if</code> — если TOS &gt;= 0.</li>
+    <li><b>Код может не влезть в дефолтные 512 байт.</b> <code>.org 0x88</code> и <code>memory_size: 0x1000</code> в conf решают. Но встроенные тесты wrench могут дать ровно 512 — надо влезать.</li>
+    <li><b><code>dup</code> не сбрасывает carry</b> — это не баг, это для <code>eam</code>.</li>
+  </ol>
+</section>
 
 </main>
 </body>

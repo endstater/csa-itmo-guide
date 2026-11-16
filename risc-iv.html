@@ -18,7 +18,7 @@
   <a href="schema.html">schema</a>
 </nav>
 
-<p class='source'>Источник: <a href='https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/slides/09-microcode-stack-risc-pipeline.md'>лекция 9 — Control Unit. Microcode. Stack. RISC. Pipeline</a> · <a href='https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/slides/08-isa-harvard-cisc.md'>лекция 8 — ISA. Принстон vs. Гарвард. CISC</a></p>
+<p class='source'>Источник: <a href='https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/slides/09-microcode-stack-risc-pipeline.md'>лекция 9 — Control Unit. Microcode. Stack. RISC. Pipeline</a> · <a href='https://gitlab.se.ifmo.ru/computer-systems/csa-rolling/-/blob/master/slides/08-isa-harvard-cisc.md'>лекция 8 — ISA. Принстон vs. Гарвард. CISC</a> · <a href='https://github.com/ryukzak/wrench/blob/master/docs/risc-iv.md'>wrench docs/risc-iv.md</a></p>
 
 <header>
   <h1>risc-iv</h1>
@@ -43,21 +43,34 @@
 
 <section>
   <h2>2. Система команд</h2>
-  <p>Полный перечень инструкций risc-iv-32 — в документации <a href="https://github.com/ryukzak/wrench">wrench</a>. Ниже — инструкции и приёмы, которые встречаются в лекциях и в вопросах к защите.</p>
+  <p>Полный перечень инструкций risc-iv-32 — в <a href="https://github.com/ryukzak/wrench/blob/master/docs/risc-iv.md">документации wrench</a>. Ниже — то, что встречается в лекциях, в вопросах к защите и в реальной работе над лабой.</p>
 
-  <h3>Инструкции из лекций</h3>
+  <h3>Регистры</h3>
+  <p>32 регистра, из них:</p>
+  <ul>
+    <li><code>zero</code> — константа 0, запись игнорируется;</li>
+    <li><code>ra</code> — адрес возврата из процедуры (caller-saved);</li>
+    <li><code>sp</code> — указатель стека (callee-saved);</li>
+    <li><code>gp</code>, <code>tp</code> — глобальный и thread-указатели (callee-saved);</li>
+    <li><code>a0</code>–<code>a7</code> — аргументы и возвращаемые значения (caller-saved);</li>
+    <li><code>t0</code>–<code>t6</code> — временные (caller-saved);</li>
+    <li><code>s0</code>/<code>fp</code>, <code>s1</code>–<code>s11</code> — сохранённые (callee-saved).</li>
+  </ul>
+  <p><b>Caller-saved</b> — вызываемая функция может испортить, не восстанавливая. <b>Callee-saved</b> — вызываемая обязана сохранить и восстановить, если меняла.</p>
+
+  <h3>Инструкции</h3>
   <table>
-    <thead><tr><th>Инструкция</th><th>Что делает</th><th>Где</th></tr></thead>
+    <thead><tr><th>Группа</th><th>Инструкции</th><th>Что делают</th></tr></thead>
     <tbody>
-      <tr><td><code>lw rd, off(rb)</code></td><td>загрузить слово из памяти по адресу <code>rb + off</code> в регистр</td><td>лекция 9 (стадии конвейера)</td></tr>
-      <tr><td><code>sw rs, off(rb)</code></td><td>сохранить слово из регистра в память по адресу <code>rb + off</code></td><td>лекция 9</td></tr>
-      <tr><td><code>add rd, rs1, rs2</code></td><td>сложение регистров</td><td>лекция 9</td></tr>
-      <tr><td><code>addi rd, rs, imm</code></td><td>сложение регистра с непосредственным значением</td><td>лекция 8 (пример MIPS addi)</td></tr>
-      <tr><td><code>mul rd, rs1, rs2</code></td><td>умножение</td><td>лекция 9 (пример sum_of_squares)</td></tr>
-      <tr><td><code>jal ra, L</code></td><td>вызов процедуры: адрес возврата в <code>ra</code>, переход на L</td><td>лекция 9</td></tr>
-      <tr><td><code>jalr zero, ra, 0</code></td><td>возврат из процедуры по адресу в <code>ra</code></td><td>лекция 9</td></tr>
-      <tr><td><code>mv rd, rs</code></td><td>пересылка регистр-регистр (псевдоним <code>addi rd, rs, 0</code>)</td><td>лекция 9</td></tr>
-      <tr><td><code>lui</code>, <code>addi</code>, <code>auipc</code></td><td>загрузка 32-битной константы и дальний переход в две инструкции</td><td>лекция 9 (пример RISC-V)</td></tr>
+      <tr><td>Загрузка адреса</td><td><code>lui rd, %hi(sym)</code> + <code>addi rd, rd, %lo(sym)</code></td><td>собрать 32-битный адрес из двух инструкций</td></tr>
+      <tr><td>Загрузка/сохранение</td><td><code>lw rd, off(rb)</code>, <code>lb rd, off(rb)</code>, <code>sw rs, off(rb)</code>, <code>sb rs, off(rb)</code></td><td>слово/байт из памяти в регистр и обратно. <b>Только эти</b> трогают память</td></tr>
+      <tr><td>Арифметика</td><td><code>add</code>, <code>sub</code>, <code>addi</code>, <code>mul</code>, <code>mulh</code>, <code>div</code>, <code>rem</code></td><td>регистр-регистр или регистр-непосредственное</td></tr>
+      <tr><td>Логика</td><td><code>and</code>, <code>or</code>, <code>xor</code>, <code>andi</code>, <code>ori</code>, <code>xori</code></td><td>побитовые</td></tr>
+      <tr><td>Сдвиги</td><td><code>sll</code>, <code>srl</code>, <code>sra</code>, <code>slli</code>, <code>srli</code>, <code>srai</code></td><td>влево, вправо логический, вправо арифметический. Сдвиг — 5-битный (0..31), только константа</td></tr>
+      <tr><td>Переходы</td><td><code>j L</code>, <code>jal ra, L</code>, <code>jalr rd, rs, k</code></td><td>jump, call, return (<code>jalr zero, ra, 0</code>)</td></tr>
+      <tr><td>Условные</td><td><code>beq</code>, <code>bne</code>, <code>beqz</code>, <code>bnez</code>, <code>blt</code>, <code>bge</code>, <code>bltu</code>, <code>bgeu</code>, <code>slti</code></td><td>ветвления; <code>u</code>-суффикс — unsigned</td></tr>
+      <tr><td>Пересылка</td><td><code>mv rd, rs</code></td><td>псевдоним <code>addi rd, rs, 0</code></td></tr>
+      <tr><td>Останов</td><td><code>halt</code></td><td>остановить машину</td></tr>
     </tbody>
   </table>
 
@@ -72,8 +85,24 @@
   </table>
   <p>В лекции отмечено: по замерам Hennessy и Patterson на VAX смещение, непосредственная и косвенная регистровая дают 75–99% использований — поэтому в RISC-V для памяти оставили один режим «база + смещение». Вопрос к защите «что означает <code>0(t1)</code>» — ровно про эту форму: адрес = содержимое регистра <code>t1</code> плюс смещение <code>0</code>.</p>
 
-  <h3>Формат инструкции</h3>
-  <p>Из лекции 8 — пример кодирования на MIPS32 (<code>addi</code>): поля <code>OP Code</code>, <code>Addr 1/2</code> (регистры общего назначения), <code>Immediate value</code>. Смысл: <code>$r1 &lt;- $r2 + 350</code>. Единый формат — простой декодер; плата за это — константа занимает лишь часть 32 бит, поэтому загрузка 32-битного числа и дальний переход требуют двух инструкций (пример в лекции 9).</p>
+  <h3>Поля инструкции и их ограничения</h3>
+  <table>
+    <thead><tr><th>Поле</th><th>Ширина</th><th>Диапазон</th></tr></thead>
+    <tbody>
+      <tr><td><code>lw</code>/<code>lb</code>/<code>sw</code>/<code>sb</code> offset</td><td>12-бит signed</td><td>-2048 .. 2047</td></tr>
+      <tr><td><code>addi</code>, <code>slti</code>, <code>andi</code>, <code>ori</code>, <code>xori</code>, <code>jalr</code> imm</td><td>12-бит signed</td><td>-2048 .. 2047</td></tr>
+      <tr><td>сдвиг <code>slli</code>/<code>srli</code>/<code>srai</code></td><td>5-бит unsigned</td><td>0 .. 31</td></tr>
+      <tr><td>ветвление</td><td>13-бит signed</td><td>-4096 .. 4095</td></tr>
+      <tr><td><code>j</code>/<code>jal</code></td><td>21-бит signed</td><td>-1048576 .. 1048575</td></tr>
+      <tr><td><code>lui</code></td><td>20-бит unsigned</td><td>0 .. 1048575</td></tr>
+    </tbody>
+  </table>
+
+  <h3><code>%hi</code> и <code>%lo</code></h3>
+  <p>Адрес или 32-битную константу нельзя загрузить одной инструкцией — поле слишком узкое. Собирается из двух:</p>
+<pre>lui  a0, %hi(address)     ; старшие 20 бит
+addi a0, a0, %lo(address) ; младшие 12 бит (signed)</pre>
+  <p><code>%hi(sym) = ((sym + 0x800) &gt;&gt; 12) &amp; 0xFFFFF</code> — округление вверх на 0x800 компенсирует знаковое расширение <code>%lo</code>. <code>%lo(sym) = signext(sym[11:0])</code>.</p>
 </section>
 
 <section>
@@ -86,8 +115,10 @@
   </ul>
   <p>Общие требования (для всех ISA):</p>
   <ul>
-    <li>ввод через <code>0x80</code>, вывод через <code>0x84</code>; 32-битное слово по умолчанию;</li>
-    <li>ввод вне области определения — <code>-1</code>; переполнение слова — байты <code>0xCC</code>;</li>
+    <li>ввод через <code>0x80</code>, вывод через <code>0x84</code>;</li>
+    <li>32-битное слово по умолчанию;</li>
+    <li>ввод вне области определения — <code>-1</code>; переполнение — байты <code>0xCC</code>;</li>
+    <li><b><code>.org 0x88</code></b> — данные сразу за MMIO-портами, иначе зря сжигается 120 байт;</li>
     <li>код отформатирован, журнал не обрезан; сдача — не чаще раза в 24 часа.</li>
   </ul>
   <p>Почему «вложенные процедуры» — это требование про стек: при вызове одной процедуры из другой адрес возврата (<code>ra</code>) нужно сохранить в кадр стека, иначе он затрётся. В лекции 9 это показано на примере: у листовой функции <code>square</code> кадра нет, а у <code>sum_of_squares</code>, которая дважды её вызывает, — есть.</p>
@@ -123,11 +154,41 @@ sum_of_squares:               ; a0 = a0*a0 + a1*a1
     <li><b><code>s0</code></b> хранит <code>b</code>, потому что <code>a1</code> затирается вызовом <code>square</code> — значения переживают вызов только в сохранённых регистрах или в памяти.</li>
     <li><b>Доступ к памяти</b> — только <code>lw</code>/<code>sw</code>; <code>mul</code> и <code>add</code> работают исключительно с регистрами.</li>
   </ul>
-  <p>Сравнение из той же лекции: на стековой машине этот алгоритм — 5 «слов», на risc-iv — 15 инструкций, из них 8 на кадр (выделить/освободить, сохранить/восстановить <code>ra</code>, <code>s0</code>, <code>s1</code>). Вывод лекции: в Forth пишут много мелких слов, а в регистровых архитектурах компилятор встраивает (inline) мелкие функции.</p>
-  <p>Ещё пример (лекция 8) — линейная функция на регистр-регистре; здесь видны ограничения формата: константы и переменные сначала грузятся в регистры.</p>
+  <p>Чтение MMIO и запись результата — идиома <code>lui %hi</code> + <code>addi %lo</code> + <code>lw</code>/<code>sw</code>:</p>
+<pre>    .data
+    .org 0x88
+input_addr:     .word 0x80
+output_addr:    .word 0x84
+    .text
+_start:
+    lui  t0, %hi(input_addr)
+    addi t0, t0, %lo(input_addr)
+    lw   t0, 0(t0)            ; t0 <- *input_addr = 0x80
+    lw   a0, 0(t0)            ; a0 <- *0x80 (вход)
+    jal  ra, sum_of_digits    ; вызов процедуры
+    lui  t0, %hi(output_addr)
+    addi t0, t0, %lo(output_addr)
+    lw   t0, 0(t0)            ; t0 <- *output_addr = 0x84
+    sw   a0, 0(t0)            ; *0x84 <- результат
+    halt</pre>
+  <p>Сравнение из лекции 9: на стековой машине этот алгоритм — 5 «слов», на risc-iv — 15 инструкций, из них 8 на кадр. Вывод лекции: в Forth пишут много мелких слов, а в регистровых архитектурах компилятор встраивает (inline) мелкие функции.</p>
 </section>
 
-
+<section>
+  <h2>5. Грабли (из личного опыта)</h2>
+  <ol>
+    <li><b><code>sp</code> по умолчанию 0.</b> В <code>_start</code> надо явно загрузить вершину стека (например, из ячейки <code>stack_top</code>), иначе <code>addi sp, sp, -N</code> уйдёт в отрицательные адреса и упадёт с <code>memory access error</code>.</li>
+    <li><b><code>addi</code> — 12-битный signed.</b> Диапазон -2048..2047. Вершина стека 0xFF0 (4080) не влезает, 0x7F0 (2032) — влезает. Если нужно больше — через <code>lui</code>+<code>addi</code>.</li>
+    <li><b><code>lui</code> не принимает отрицательные.</b> imm ∈ [0, 1048575]. Для маленьких констант удобнее <code>addi rd, zero, imm</code>.</li>
+    <li><b><code>li</code> не существует.</b> Только <code>lui</code>+<code>addi</code>. Для маленьких — <code>addi rd, zero, imm</code>.</li>
+    <li><b><code>div</code> и <code>rem</code> — signed, как в C.</b> Quotient toward zero, remainder со знаком делимого: <code>-456 % 10 = -6</code>, <code>-456 / 10 = -45</code>. Это <b>не</b> Python-семантика (там floor division и remainder со знаком делителя). Значит, знак остатка снимать вручную (<code>sub zero, t</code>).</li>
+    <li><b><code>divu</code> и <code>remu</code> не существуют.</b> Только signed.</li>
+    <li><b>Флага переполнения нет.</b> Перенос и знаковое переполнение проверяются программно (сравнение знаков операндов и результата).</li>
+    <li><b><code>abs(INT32_MIN)</code> переполняется.</b> Нельзя бездумно брать модуль минимального 32-битного числа. Обход: применять <code>abs</code> только к остатку <code>rem ∈ [-9, 9]</code>, а не ко входу.</li>
+    <li><b>Встроенные тесты могут дать 512 байт.</b> Свой <code>memory_size: 0x1000</code> их не исправит — надо влезать в их лимит. Проверка: <code>wrench файл.asm --isa risc-iv-32</code> <b>без</b> <code>-c</code>.</li>
+    <li><b><code>.org 0x88</code> экономит 120 байт.</b> При дефолтных 512 это часто решает «влезает / не влезает».</li>
+  </ol>
+</section>
 
 </main>
 </body>
